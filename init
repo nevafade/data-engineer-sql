@@ -1,0 +1,1 @@
+DDL Statements CREATE, ALTER, DROP and TRUNCATE cannot be rolled back in a transaction - Do not use truncate in a transaction and expect things to work
