@@ -7,3 +7,9 @@ select * from sys. sysprocesses where open_tran = 1
 SNOWFLAKE
 
 https://docs.snowflake.com/en/sql-reference/constructs/at-before
+
+import streamlit as st
+snowpark_df = session.sql("SELECT GET_PRESIGNED_URL(@common_db.resources.course_files, 'veggie_details_a_to_k_comma_opt_enclosed.csv')")
+collected_data = snowpark_df.collect()
+st.write('Click the following link to download the file:')
+st.write(collected_data[0][0])
