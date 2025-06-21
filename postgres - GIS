@@ -1,0 +1,58 @@
+sudo apt install postgis postgresql-15-postgis-3
+CREATE EXTENSION postgis;
+SELECT PostGIS_full_version();
+
+
+KEY DATA TYPES------------------------------------------------------>
+| Data Type   | Use Case                     |
+| ----------- | ---------------------------- |
+| `geometry`  | Cartesian coordinates (x, y) |
+| `geography` | Earth-based (lat/lon, GPS)   |
+| `raster`    | Images and terrain maps      |
+
+CREATE TABLE cities (
+  name TEXT,
+  location GEOGRAPHY(Point, 4326)
+);
+
+Common GIS Functions------------------------------------------------------>
+| Function                   | Description                        |
+| -------------------------- | ---------------------------------- |
+| `ST_Distance(a, b)`        | Distance between two geometries    |
+| `ST_Within(a, b)`          | Is `a` inside `b`?                 |
+| `ST_Intersects(a, b)`      | Do `a` and `b` overlap?            |
+| `ST_Area(geom)`            | Area of a polygon                  |
+| `ST_AsText(geom)`          | Convert to readable WKT text       |
+| `ST_GeomFromText(wkt)`     | Create geometry from WKT string    |
+| `ST_Transform(geom, srid)` | Convert between coordinate systems |
+
+
+CREATE INDEX idx_cities_location
+ON cities
+USING GIST(location);
+
+CREATE TABLE places (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  geom GEOMETRY(Point, 4326)
+);
+
+-- Insert a point (lon, lat)
+INSERT INTO places (name, geom)
+VALUES ('Library', ST_SetSRID(ST_MakePoint(144.9631, -37.8136), 4326));
+
+-- Find places within 1 km of a point
+SELECT name
+FROM places
+WHERE ST_DWithin(
+  geom,
+  ST_SetSRID(ST_MakePoint(144.9631, -37.8136), 4326),
+  1000
+);
+
+
+
+
+
+
+
