@@ -1,0 +1,58 @@
+
+################ Python functions in Postgres ################
+
+sudo apt-get install postgresql-plpython3-14
+CREATE EXTENSION plpython3u;
+SELECT * FROM pg_catalog.pg_available_extensions WHERE NAME = 'plpython3u';
+
+
+
+################ Custom Opetrators in Postgres ################
+
+-- Create a simple function
+CREATE FUNCTION add_em(int, int) RETURNS int AS $$
+    SELECT $1 + $2;
+$$ LANGUAGE SQL;
+
+-- Create a custom operator +#
+CREATE OPERATOR +# (
+    LEFTARG = int,
+    RIGHTARG = int,
+    PROCEDURE = add_em
+);
+
+
+################ NOSQL in Postgres (TYPE) ################
+
+CREATE TYPE full_name AS (
+    first_name TEXT,
+    last_name TEXT
+);
+
+CREATE TYPE mood AS ENUM ('happy', 'sad', 'angry');
+
+
+################ NOSQL in Postgres (FDW) ################
+
+CREATE EXTENSION postgres_fdw;
+
+CREATE SERVER foreign_srv
+FOREIGN DATA WRAPPER postgres_fdw
+OPTIONS (host 'remotehost', dbname 'remotedb', port '5432');
+
+CREATE USER MAPPING FOR local_user
+SERVER foreign_srv
+OPTIONS (user 'remote_user', password 'secret');
+
+IMPORT FOREIGN SCHEMA public
+FROM SERVER foreign_srv INTO local_schema;
+
+
+| FDW Name       | Backend                  |
+| -------------- | ------------------------ |
+| `postgres_fdw` | PostgreSQL               |
+| `mysql_fdw`    | MySQL                    |
+| `oracle_fdw`   | Oracle                   |
+| `mongo_fdw`    | MongoDB                  |
+| `file_fdw`     | Flat files (CSV)         |
+| `odbc_fdw`     | Anything ODBC-compatible |
