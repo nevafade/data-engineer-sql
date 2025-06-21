@@ -56,3 +56,26 @@ FROM SERVER foreign_srv INTO local_schema;
 | `mongo_fdw`    | MongoDB                  |
 | `file_fdw`     | Flat files (CSV)         |
 | `odbc_fdw`     | Anything ODBC-compatible |
+
+
+
+################ PITR - Point in tine in Postgres ################
+
+archive_mode = on
+archive_command = 'cp %p /path/to/wal_archive/%f'
+wal_level = replica
+
+pg_basebackup -D /path/to/basebackup -F tar -z -P --wal-method=stream
+
+sudo systemctl stop postgresql
+rm -rf /var/lib/postgresql/15/main/*
+tar -xvf basebackup.tar.gz -C /var/lib/postgresql/15/main/
+touch recovery.signal
+restore_command = 'cp /path/to/wal_archive/%f %p'
+recovery_target_time = '2025-06-21 15:30:00'  # desired point in time
+sudo systemctl start postgresql
+
+
+
+
+
